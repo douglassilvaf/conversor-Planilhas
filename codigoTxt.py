@@ -1,44 +1,32 @@
 import pandas as pd
 
-# Function to handle parsing errors (replace with your specific logic)
-def handle_parsing_error(line):
+def convert_date(data):
     try:
-        # Replace this with your parsing logic to separate values based on delimiter
-        # (';' in this case) and create a dictionary or list as needed
-        data_dict = {
-            "column1": 'Data Acionamento',  # Replace with actual column names and parsed values
-            "column2": 'Data Registro',
-            # ... add more key-value pairs for other columns
-        }
-        return data_dict
-    except Exception as e:
-        print(f"Error parsing line: {line}")
-        # Handle the error (e.g., log, skip row, etc.)
-        return None  # Or return a default value (e.g., empty dictionary)
+        formatted_date = pd.to_datetime(data, format='%d/%m/%Y').strftime('%Y-%m-%d')
+        return formatted_date
+    except ValueError:
+        return data  # Retorna a data original se não puder ser convertida
 
-# Read the CSV file
 input_csv = "REGISTRO_ALERTASPLD.csv"
+
 try:
-    # Open the file in read mode with UTF-16 encoding
-    with open(input_csv, 'r', encoding="utf-16") as f:
-        lines = f.readlines()
-
-        # Skip the header row (optional)
-        data = [handle_parsing_error(line) for line in lines[1:]]
-
-    # Create a DataFrame from the parsed data
-    if data:  # Check if any data was successfully parsed
-        df = pd.DataFrame(data)
-    else:
-        print("No valid data found in the CSV file.")
-
+    df = pd.read_csv(input_csv, sep="\t", encoding="utf-16")  # Especifica a codificação UTF-16
     if df.empty:
-        print("The DataFrame is empty after parsing.")
+        print("O DataFrame está vazio após a leitura do arquivo.")
     else:
-        print("File parsed successfully (with potential errors handled).")
+        print("Arquivo lido com sucesso:")
         print(df.head())
 
+        date_column_list = [col for col in df.columns if "Data" in col]
+        for col in date_column_list:
+            df[col] = df[col].apply(convert_date)
+
+        output_txt = "teste_cleanedfinal.txt"
+        try:
+            df.to_csv(output_txt, sep="|", encoding="utf-8", index=False)
+            print(f"{output_txt} foi salvo com sucesso com o delimitador '|'.")
+        except Exception as e:
+            print(f"Erro ao salvar o arquivo: {e}")
+
 except Exception as e:
-    print(f"Error reading the file: {e}")
-
-
+    print(f"Erro ao ler o arquivo: {e}")
