@@ -1,4 +1,3 @@
-```markdown
 # Portfólio de Projetos
 
 ## Sobre Mim
