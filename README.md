@@ -1,5 +1,3 @@
-Claro, aqui está o README.md atualizado com a descrição de ambos os códigos:
-
 ```markdown
 # Portfólio de Projetos
 
