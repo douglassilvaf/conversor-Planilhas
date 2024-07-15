@@ -77,19 +77,19 @@ except Exception as e:
     print(f"Error reading the file: {e}")
 ```
 
-### 2. Projeto: Leitura e Manipulação de Arquivo .TXT
+### 2. Projeto: Conversão e Salvamento de Dados de Arquivo .CSV para .TXT
 
 #### Descrição
-Este projeto visa ler um arquivo .txt, tratar possíveis erros de parsing e criar um DataFrame com os dados lidos. O código lida com a leitura de arquivos .txt com codificação UTF-16 e converte-os em um DataFrame, tratando possíveis erros de parsing durante o processo.
+Este projeto visa ler um arquivo CSV com codificação UTF-16, converter as datas no formato `dd/mm/yyyy` para `yyyy-mm-dd`, e salvar o resultado em um arquivo .txt com delimitador `|` e codificação UTF-8. O código manipula as colunas de datas especificadas no arquivo de entrada e trata erros de conversão caso as datas não estejam no formato esperado.
 
 #### Tecnologias Utilizadas
 - Python
 - Pandas
 
 #### Funcionalidades
-- Leitura de arquivos .txt com codificação UTF-16
-- Tratamento de erros de parsing durante a leitura
-- Criação de um DataFrame a partir dos dados lidos
+- Leitura de arquivo CSV com codificação UTF-16
+- Conversão de datas de `dd/mm/yyyy` para `yyyy-mm-dd`
+- Salvamento de dados em um arquivo .txt com delimitador `|` e codificação UTF-8
 
 #### Como Executar
 1. Clone o repositório:
@@ -102,58 +102,50 @@ Este projeto visa ler um arquivo .txt, tratar possíveis erros de parsing e cria
    cd conversor-Planilhas
    ```
 
-3. Instale as dependências:
+3. Instale as dependências necessárias:
    ```bash
    pip install pandas
    ```
 
 4. Execute o script Python:
    ```bash
-   python ler_txt.py
+   python codigoTxt.py
    ```
 
 #### Código
 ```python
 import pandas as pd
 
-# Function to handle parsing errors (replace with your specific logic)
-def handle_parsing_error(line):
+def convert_date(data):
     try:
-        # Replace this with your parsing logic to separate values based on delimiter
-        # (';' in this case) and create a dictionary or list as needed
-        data_dict = {
-            "column1": 'Data Acionamento',  # Replace with actual column names and parsed values
-            "column2": 'Data Registro',
-            # ... add more key-value pairs for other columns
-        }
-        return data_dict
-    except Exception as e:
-        print(f"Error parsing line: {line}")
-        # Handle the error (e.g., log, skip row, etc.)
-        return None  # Or return a default value (e.g., empty dictionary)
+        formatted_date = pd.to_datetime(data, format='%d/%m/%Y').strftime('%Y-%m-%d')
+        return formatted_date
+    except ValueError:
+        return data  # Retorna a data original se não puder ser convertida
 
-# Read the CSV file
-input_csv = "Exemplo.csv"
+input_csv = "TESTE.csv"
+
 try:
-    # Open the file in read mode with UTF-16 encoding
-    with open(input_csv, 'r', encoding="utf-16") as f:
-        lines = f.readlines()
-
-        # Skip the header row (optional)
-        data = [handle_parsing_error(line) for line in lines[1:]]
-
-    # Create a DataFrame from the parsed data
-    if data:  # Check if any data was successfully parsed
-        df = pd.DataFrame(data)
-    else:
-        print("No valid data found in the CSV file.")
-
+    df = pd.read_csv(input_csv, sep="\t", encoding="utf-16")  # Especifica a codificação UTF-16
     if df.empty:
-        print("The DataFrame is empty after parsing.")
+        print("O DataFrame está vazio após a leitura do arquivo.")
     else:
-        print("File parsed successfully (with potential errors handled).")
+        print("Arquivo lido com sucesso:")
         print(df.head())
 
+        date_column_list = [col for col in df.columns if "Data" in col]
+        for col in date_column_list:
+            df[col] = df[col].apply(convert_date)
+
+        output_txt = "teste_cleaned.txt"
+        try:
+            df.to_csv(output_txt, sep="|", encoding="utf-8", index=False)
+            print(f"{output_txt} foi salvo com sucesso com o delimitador '|'.")
+        except Exception as e:
+            print(f"Erro ao salvar o arquivo: {e}")
+
 except Exception as e:
-    print(f"Error reading the file: {e}")
+    print(f"Erro ao ler o arquivo: {e}")
 ```
+
+Certifique-se de ajustar conforme necessário para refletir precisamente as especificações e funcionalidades do seu projeto.
